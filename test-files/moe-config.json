@@ -1,0 +1,19 @@
+{
+    "// CONFIGURAÇÃO PARA TESTAR MOE": "Cole no settings.json",
+    "angoIA.enabled": true,
+    "angoIA.provider": "ollama",
+    "angoIA.streaming.enabled": true,
+    "angoIA.ollama.endpoint": "http://localhost:11434",
+    "angoIA.ollama.model": "llama3",
+    "angoIA.openai.model": "gpt-4o-mini",
+    "angoIA.moe.enabled": true,
+    "angoIA.moe.writer.provider": "ollama",
+    "angoIA.moe.writer.model": "llama3",
+    "angoIA.moe.critic.provider": "openai",
+    "angoIA.moe.critic.model": "gpt-4o-mini",
+    "angoIA.moe.critic.enabledForGenerate": true,
+    "angoIA.moe.critic.enabledForRefactor": true,
+    "angoIA.moe.critic.minChars": 50,
+    "angoIA.memory.enabled": true,
+    "angoIA.memory.storeRawContext": false
+}

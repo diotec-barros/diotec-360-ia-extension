@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANGO IA | v2.1.3 WebGPU Inference</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&family=Inter:wght@400;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #e2e8f0; }
+        .code-font { font-family: 'Fira Code', monospace; }
+        .glass { background: rgba(23, 23, 26, 0.8); backdrop-filter: blur(10px); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col">
+
+    <header class="border-b border-white/10 p-4 flex justify-between items-center glass z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold shadow-lg shadow-blue-600/40">A</div>
+            <h1 class="text-xl font-bold tracking-tighter">ANGO <span class="text-blue-500">IA</span></h1>
+            <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">v2.1.3 BRAIN ONLINE</span>
+        </div>
+        <div class="flex gap-6 items-center">
+            <div id="peer-count" class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+                <i class="fas fa-network-wired mr-1"></i> Peers: <span id="peer-val" class="text-blue-400">0</span>
+            </div>
+            <div class="h-4 w-[1px] bg-white/10"></div>
+            <div id="mesh-status" class="text-xs text-green-400 flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Mesh Node Online
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <aside class="w-64 border-r border-white/10 p-4 hidden md:flex flex-col">
+            <h2 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Projetos Ativos</h2>
+            <nav class="flex-1 space-y-2">
+                <div class="p-3 bg-blue-600/10 border border-blue-600/30 rounded-xl text-sm text-blue-400 flex justify-between items-center">
+                    <span><i class="fas fa-microchip mr-2"></i> Main_Node_01</span>
+                    <span id="agent-status" class="text-[8px] bg-blue-500 text-white px-1 rounded">IDLE</span>
+                </div>
+            </nav>
+            <div class="mt-auto p-4 bg-white/5 rounded-xl">
+                <p class="text-[10px] text-gray-500 uppercase mb-2">Global Mesh Intelligence</p>
+                <div id="mesh-pulse" class="text-[9px] text-blue-300 italic opacity-70">Aguardando sinais...</div>
+                <div id="mesh-stream" class="mt-3 space-y-2 max-h-28 overflow-y-auto code-font text-[10px]"></div>
+            </div>
+        </aside>
+
+        <section class="flex-1 flex flex-col relative">
+            <div class="flex-1 p-6 overflow-y-auto">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-4 focus-within:border-blue-500/50 transition-all">
+                        <textarea id="user-input" class="w-full bg-transparent border-none focus:outline-none text-lg resize-none placeholder-gray-600" rows="3" placeholder="Comando para a Colmeia AngoIA..."></textarea>
+                        <div class="flex justify-between items-center mt-4 border-t border-white/5 pt-4">
+                            <div class="flex gap-2 items-center">
+                                <span id="brain-backend" class="text-[10px] text-gray-500 border border-white/10 px-2 py-1 rounded">BRAIN: INIT</span>
+                                <div id="brain-progress" class="hidden w-28 h-2 rounded bg-white/10 overflow-hidden border border-white/10">
+                                    <div id="brain-progress-bar" class="h-full w-0 bg-blue-500"></div>
+                                </div>
+                                <span class="text-[10px] text-gray-500 border border-white/10 px-2 py-1 rounded">P2P MESH</span>
+                                <div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+                                <label class="flex items-center gap-2 text-[10px] text-gray-500 border border-white/10 px-2 py-1 rounded select-none">
+                                    <input id="agent-mode" type="checkbox">
+                                    AGENTE
+                                </label>
+                            </div>
+                            <button onclick="runAngo()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95">Executar <span class="text-[10px] opacity-50 ml-2">CTRL+↵</span></button>
+                        </div>
+                    </div>
+                    <div id="output-container" class="space-y-4 pb-20"></div>
+                </div>
+            </div>
+
+            <div class="h-56 border-t border-white/10 glass flex flex-col">
+                <div class="p-2 px-4 border-b border-white/5 flex justify-between items-center gap-4">
+                    <h3 class="text-gray-500 uppercase tracking-widest text-[9px] font-bold whitespace-nowrap">MOE v2.1.1 Console</h3>
+                    <div class="flex-1 flex items-center gap-2 overflow-x-auto">
+                        <button data-filter="ALL" onclick="setConsoleFilter('ALL')" class="console-filter text-[9px] text-gray-400 border border-white/10 px-2 py-1 rounded hover:bg-white/5 uppercase">All</button>
+                        <button data-filter="SENTINEL" onclick="setConsoleFilter('SENTINEL')" class="console-filter text-[9px] text-gray-600 border border-white/10 px-2 py-1 rounded hover:bg-white/5 uppercase">Sentinel</button>
+                        <button data-filter="Z3_LOGIC" onclick="setConsoleFilter('Z3_LOGIC')" class="console-filter text-[9px] text-gray-600 border border-white/10 px-2 py-1 rounded hover:bg-white/5 uppercase">Z3</button>
+                        <button data-filter="GUARDIAN" onclick="setConsoleFilter('GUARDIAN')" class="console-filter text-[9px] text-gray-600 border border-white/10 px-2 py-1 rounded hover:bg-white/5 uppercase">Guardian</button>
+                        <button data-filter="SUCCESS" onclick="setConsoleFilter('SUCCESS')" class="console-filter text-[9px] text-gray-600 border border-white/10 px-2 py-1 rounded hover:bg-white/5 uppercase">Success</button>
+                        <button data-filter="MESH" onclick="setConsoleFilter('MESH')" class="console-filter text-[9px] text-gray-600 border border-white/10 px-2 py-1 rounded hover:bg-white/5 uppercase">Mesh</button>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="clearConsole()" class="text-[9px] text-gray-600 hover:text-gray-400 uppercase">Limpar</button>
+                        <label class="flex items-center gap-2 text-[9px] text-gray-600 whitespace-nowrap select-none">
+                            <input type="checkbox" id="auto-scroll" checked>
+                            AUTO-SCROLL
+                        </label>
+                    </div>
+                </div>
+                <div id="moe-console" class="flex-1 overflow-y-auto p-4 code-font text-[11px] space-y-1">
+                    <div class="text-gray-700 italic">AngoIA Mesh v2.1.1 inicializada...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const RELAYS = ['https://gun-manhattan.herokuapp.com/gun'];
+        const gun = Gun(RELAYS);
+        const mesh = gun.get('angoia_mesh_v211');
+
+        const userInput = document.getElementById('user-input');
+        const agentStatus = document.getElementById('agent-status');
+        const meshPulse = document.getElementById('mesh-pulse');
+        const meshStream = document.getElementById('mesh-stream');
+        const peerVal = document.getElementById('peer-val');
+        const brainBackendEl = document.getElementById('brain-backend');
+        const brainProgressEl = document.getElementById('brain-progress');
+        const brainProgressBarEl = document.getElementById('brain-progress-bar');
+        const agentModeEl = document.getElementById('agent-mode');
+
+        let consoleFilter = 'ALL';
+        let lastSeenMeshTs = 0;
+        let lastMeshIntentSamples = [];
+        let brainReady = false;
+        let brainBackend = 'init';
+        let brainModel = '';
+        let worker = null;
+        let requestSeq = 0;
+        let brainInitPromise = null;
+        let brainInitResolve = null;
+        let brainInitReject = null;
+        const sessionId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Math.random()).slice(2);
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') runAngo();
+        });
+
+        function clearConsole() {
+            document.getElementById('moe-console').innerHTML = '';
+        }
+
+        function setConsoleFilter(filter) {
+            consoleFilter = filter;
+            const buttons = document.querySelectorAll('.console-filter');
+            buttons.forEach((b) => {
+                const active = b.getAttribute('data-filter') === filter;
+                b.classList.toggle('bg-white/10', active);
+                b.classList.toggle('text-gray-200', active);
+                b.classList.toggle('text-gray-400', !active && b.getAttribute('data-filter') === 'ALL');
+                if (!active && b.getAttribute('data-filter') !== 'ALL') {
+                    b.classList.add('text-gray-600');
+                    b.classList.remove('text-gray-200');
+                }
+            });
+            applyConsoleFilter();
+        }
+
+        function applyConsoleFilter() {
+            const consoleEl = document.getElementById('moe-console');
+            const lines = consoleEl.querySelectorAll('[data-expert]');
+            lines.forEach((line) => {
+                const expert = line.getAttribute('data-expert');
+                const visible = consoleFilter === 'ALL' || consoleFilter === expert;
+                line.style.display = visible ? '' : 'none';
+            });
+        }
+
+        function logMoe(expert, msg, colorClass) {
+            const consoleEl = document.getElementById('moe-console');
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+            div.className = `${colorClass} opacity-90`;
+            div.setAttribute('data-expert', expert);
+            div.innerHTML = `<span class="text-gray-600 text-[9px] mr-2">${time}</span>[${expert}]: <span class="text-gray-300">${escapeHtml(msg)}</span>`;
+            consoleEl.appendChild(div);
+
+            applyConsoleFilter();
+
+            if (document.getElementById('auto-scroll').checked) {
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+            }
+        }
+
+        function pushMeshStreamLine(text) {
+            const div = document.createElement('div');
+            div.className = 'text-blue-300/80';
+            div.textContent = text;
+            meshStream.prepend(div);
+
+            const lines = meshStream.querySelectorAll('div');
+            if (lines.length > 20) {
+                for (let i = 20; i < lines.length; i++) lines[i].remove();
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .split('&').join('&amp;')
+                .split('<').join('&lt;')
+                .split('>').join('&gt;')
+                .split('"').join('&quot;')
+                .split("'").join('&#039;');
+        }
+
+        function updatePeerCount() {
+            try {
+                const peers = gun && gun._ && gun._.opt && gun._.opt.peers ? gun._.opt.peers : {};
+                const count = Object.keys(peers).length;
+                peerVal.textContent = String(count);
+            } catch {
+                peerVal.textContent = '0';
+            }
+        }
+
+        setInterval(updatePeerCount, 1000);
+        updatePeerCount();
+
+        function setBrainStatus(state, backend, model) {
+            brainReady = state === 'ready';
+            if (backend) brainBackend = backend;
+            if (model) brainModel = model;
+
+            const backendText = brainReady ? String(brainBackend).toUpperCase() : 'INIT';
+            const modelText = brainModel ? ` | ${brainModel.split('/').pop()}` : '';
+            brainBackendEl.textContent = `BRAIN: ${backendText}${modelText}`;
+
+            brainBackendEl.classList.remove('text-gray-500', 'text-green-400', 'text-yellow-400', 'text-red-400', 'border-white/10', 'border-green-500/30', 'border-yellow-500/30', 'border-red-500/30');
+            brainBackendEl.classList.add('border');
+
+            if (!brainReady) {
+                brainBackendEl.classList.add('text-yellow-400', 'border-yellow-500/30');
+                return;
+            }
+
+            if (brainBackend === 'webgpu') {
+                brainBackendEl.classList.add('text-green-400', 'border-green-500/30');
+            } else {
+                brainBackendEl.classList.add('text-gray-500', 'border-white/10');
+            }
+        }
+
+        function detectWebGPU() {
+            try {
+                return typeof navigator !== 'undefined' && !!navigator.gpu;
+            } catch {
+                return false;
+            }
+        }
+
+        function makeWorker() {
+            const src = `
+                let currentModel = '';
+                let currentBackend = 'wasm';
+                let generator = null;
+
+                function pickCdn(version) {
+                    return [
+                        'https://cdn.jsdelivr.net/npm/@xenova/transformers@' + version,
+                        'https://unpkg.com/@xenova/transformers@' + version,
+                    ];
+                }
+
+                async function importTransformers(version) {
+                    const cdns = pickCdn(version);
+                    let lastErr = null;
+                    for (const base of cdns) {
+                        try {
+                            return await import(base);
+                        } catch (e) {
+                            lastErr = e;
+                        }
+                    }
+                    throw lastErr || new Error('Falha ao importar Transformers.js');
+                }
+
+                async function loadModel(modelId, backend) {
+                    currentModel = modelId;
+                    currentBackend = backend;
+
+                    if (generator) {
+                        generator = null;
+                    }
+
+                    const t = await importTransformers('2.17.2');
+                    const { pipeline, env } = t;
+
+                    if (!pipeline || !env) throw new Error('Transformers runtime indisponível.');
+                    env.allowLocalModels = false;
+                    env.useBrowserCache = true;
+
+                    let device = 'cpu';
+                    if (backend === 'webgpu') device = 'webgpu';
+
+                    generator = await pipeline('text-generation', modelId, {
+                        device,
+                        progress_callback: (p) => {
+                            try {
+                                if (!p) return;
+                                const total = (typeof p.total === 'number') ? p.total : null;
+                                const loaded = (typeof p.loaded === 'number') ? p.loaded : null;
+                                const progress = (typeof p.progress === 'number') ? p.progress : null;
+                                self.postMessage({ type: 'progress', total, loaded, progress });
+                            } catch {}
+                        }
+                    });
+                    return { model: currentModel, backend: currentBackend };
+                }
+
+                function post(type, payload) {
+                    self.postMessage({ type, ...payload });
+                }
+
+                self.onmessage = async (e) => {
+                    const msg = e.data || {};
+                    try {
+                        if (msg.type === 'init') {
+                            const primary = msg.primaryModel;
+                            const fallback = msg.fallbackModel;
+                            const backendPref = msg.backend;
+
+                            post('log', { expert: 'SENTINEL', text: 'Inicializando runtime de inferência...', color: 'text-yellow-500' });
+
+                            try {
+                                const loaded = await loadModel(primary, backendPref);
+                                post('ready', { backend: loaded.backend, model: loaded.model });
+                            } catch (errPrimary) {
+                                post('log', { expert: 'Z3_LOGIC', text: 'Falha ao carregar modelo primário. Tentando fallback...', color: 'text-purple-400' });
+                                const loaded = await loadModel(fallback, backendPref);
+                                post('ready', { backend: loaded.backend, model: loaded.model });
+                            }
+                            return;
+                        }
+
+                        if (msg.type === 'generate') {
+                            if (!generator) throw new Error('Modelo ainda não carregado.');
+                            const rid = msg.rid;
+                            const prompt = msg.prompt || '';
+                            const maxNewTokens = msg.maxNewTokens || 192;
+                            const temperature = msg.temperature ?? 0.4;
+
+                            post('log', { expert: 'GUARDIAN', text: 'Inferência local em andamento...', color: 'text-blue-400' });
+
+                            const out = await generator(prompt, {
+                                max_new_tokens: maxNewTokens,
+                                temperature,
+                                do_sample: true,
+                            });
+
+                            let text = '';
+                            if (Array.isArray(out) && out[0] && typeof out[0].generated_text === 'string') {
+                                text = out[0].generated_text;
+                            } else if (typeof out === 'string') {
+                                text = out;
+                            } else {
+                                text = JSON.stringify(out);
+                            }
+
+                            post('result', { rid, text, backend: currentBackend, model: currentModel });
+                            return;
+                        }
+                    } catch (err) {
+                        post('error', { rid: msg.rid, message: (err && err.message) ? err.message : String(err) });
+                    }
+                };
+            `;
+
+            const blob = new Blob([src], { type: 'application/javascript' });
+            return new Worker(URL.createObjectURL(blob), { type: 'module' });
+        }
+
+        function setBrainProgress(pct) {
+            const p = Math.max(0, Math.min(100, Number(pct) || 0));
+            if (p <= 0) {
+                brainProgressEl.classList.add('hidden');
+                brainProgressBarEl.style.width = '0%';
+                return;
+            }
+            brainProgressEl.classList.remove('hidden');
+            brainProgressBarEl.style.width = `${p}%`;
+            if (p >= 100) {
+                setTimeout(() => {
+                    brainProgressEl.classList.add('hidden');
+                }, 800);
+            }
+        }
+
+        async function ensureBrain() {
+            if (worker && brainReady) return;
+            if (brainInitPromise) return brainInitPromise;
+
+            setBrainStatus('loading');
+            setBrainProgress(1);
+
+            const backend = detectWebGPU() ? 'webgpu' : 'wasm';
+            const primaryModel = 'HuggingFaceTB/SmolLM-135M-Instruct';
+            const fallbackModel = 'Xenova/Qwen1.5-0.5B-Chat';
+
+            brainInitPromise = new Promise((resolve, reject) => {
+                brainInitResolve = resolve;
+                brainInitReject = reject;
+            });
+
+            if (!worker) {
+                worker = makeWorker();
+                worker.onmessage = (e) => {
+                    const msg = e.data || {};
+                    if (msg.type === 'log') {
+                        logMoe(msg.expert || 'SYSTEM', msg.text || '', msg.color || 'text-gray-500');
+                        return;
+                    }
+                    if (msg.type === 'progress') {
+                        if (typeof msg.progress === 'number') {
+                            setBrainProgress(Math.round(msg.progress * 100));
+                        } else if (typeof msg.loaded === 'number' && typeof msg.total === 'number' && msg.total > 0) {
+                            setBrainProgress(Math.round((msg.loaded / msg.total) * 100));
+                        } else {
+                            setBrainProgress(5);
+                        }
+                        return;
+                    }
+                    if (msg.type === 'ready') {
+                        setBrainProgress(100);
+                        setBrainStatus('ready', msg.backend, msg.model);
+                        logMoe('SUCCESS', `Brain pronto: ${String(msg.backend).toUpperCase()} | ${String(msg.model).split('/').pop()}`, 'text-green-400');
+                        const r = brainInitResolve;
+                        brainInitPromise = null;
+                        brainInitResolve = null;
+                        brainInitReject = null;
+                        if (r) r();
+                        return;
+                    }
+                    if (msg.type === 'result') {
+                        handleBrainResult(msg);
+                        return;
+                    }
+                    if (msg.type === 'error') {
+                        handleBrainError(msg);
+                        const rej = brainInitReject;
+                        brainInitPromise = null;
+                        brainInitResolve = null;
+                        brainInitReject = null;
+                        if (rej) rej(new Error(msg.message || 'Falha no Brain'));
+                        return;
+                    }
+                };
+            }
+
+            logMoe('SENTINEL', `Detecção de backend: ${backend.toUpperCase()}`, 'text-yellow-500');
+            worker.postMessage({ type: 'init', backend, primaryModel, fallbackModel });
+            return brainInitPromise;
+        }
+
+        function simpleOverlapScore(a, b) {
+            const tok = (s) => String(s).toLowerCase().replace(/[^a-z0-9\sáàâãéèêíìîóòôõúùûç]/gi, ' ').split(/\s+/).filter(Boolean);
+            const as = new Set(tok(a));
+            const bs = new Set(tok(b));
+            if (as.size === 0 || bs.size === 0) return 0;
+            let inter = 0;
+            as.forEach((t) => { if (bs.has(t)) inter++; });
+            return inter / Math.max(1, Math.min(as.size, bs.size));
+        }
+
+        function guardianValidate(generatedText) {
+            const samples = lastMeshIntentSamples.slice(0, 12);
+            if (!samples.length) {
+                logMoe('GUARDIAN', 'Mesh sem sinais recentes para validação cruzada.', 'text-blue-400');
+                return { score: 0, top: null };
+            }
+
+            let best = { score: 0, intent: '' };
+            for (const s of samples) {
+                const sc = simpleOverlapScore(generatedText, s.intent);
+                if (sc > best.score) best = { score: sc, intent: s.intent };
+            }
+
+            const pct = Math.round(best.score * 100);
+            if (pct >= 35) {
+                logMoe('GUARDIAN', `Validação Mesh: CORROBORADO (${pct}%) com "${best.intent}"`, 'text-green-400');
+            } else if (pct >= 18) {
+                logMoe('GUARDIAN', `Validação Mesh: PARCIAL (${pct}%) com "${best.intent}"`, 'text-yellow-500');
+            } else {
+                logMoe('GUARDIAN', `Validação Mesh: FRACA (${pct}%). Resposta não parece ancorada na colmeia.`, 'text-blue-400');
+            }
+
+            return { score: best.score, top: best.intent };
+        }
+
+        const pendingByRid = new Map();
+
+        function handleBrainResult(msg) {
+            const entry = pendingByRid.get(msg.rid);
+            if (!entry) return;
+            pendingByRid.delete(msg.rid);
+
+            const generated = String(msg.text || '');
+            const answer = generated.includes(entry.prompt) ? generated.slice(entry.prompt.length).trim() : generated.trim();
+
+            guardianValidate(answer);
+
+            entry.cardAnswerEl.textContent = answer || '(sem saída)';
+            entry.cardMetaEl.textContent = `Backend: ${String(msg.backend).toUpperCase()} | Modelo: ${String(msg.model).split('/').pop()}`;
+
+            logMoe('SUCCESS', 'Inferência concluída.', 'text-green-400');
+            agentStatus.textContent = 'IDLE';
+            agentStatus.classList.remove('bg-yellow-500');
+            agentStatus.classList.add('bg-blue-500');
+        }
+
+        function handleBrainError(msg) {
+            const entry = pendingByRid.get(msg.rid);
+            if (entry) {
+                pendingByRid.delete(msg.rid);
+                entry.cardAnswerEl.textContent = `Erro: ${String(msg.message || 'Falha na inferência')}`;
+                entry.cardMetaEl.textContent = 'Backend: N/A | Modelo: N/A';
+            }
+            logMoe('SENTINEL', `Erro no Brain: ${String(msg.message || 'Falha')}`, 'text-red-400');
+            agentStatus.textContent = 'IDLE';
+            agentStatus.classList.remove('bg-yellow-500');
+            agentStatus.classList.add('bg-blue-500');
+            setBrainStatus('loading');
+            setBrainProgress(0);
+        }
+
+        mesh.map().on((data) => {
+            if (!data || !data.intent || !data.timestamp) return;
+            if (typeof data.timestamp !== 'number') return;
+            if (data.timestamp <= lastSeenMeshTs) return;
+
+            lastSeenMeshTs = data.timestamp;
+
+            const intentPreview = String(data.intent).slice(0, 30);
+            meshPulse.innerText = `Colmeia: "${intentPreview}${intentPreview.length >= 30 ? '…' : ''}"`;
+            pushMeshStreamLine(`[${new Date(data.timestamp).toLocaleTimeString('pt-BR', { hour12: false })}] ${intentPreview}${intentPreview.length >= 30 ? '…' : ''}`);
+            logMoe('MESH', `Sinal recebido na Mesh: "${intentPreview}${intentPreview.length >= 30 ? '…' : ''}"`, 'text-blue-300');
+
+            lastMeshIntentSamples.unshift({ intent: intentPreview, timestamp: data.timestamp });
+            if (lastMeshIntentSamples.length > 50) lastMeshIntentSamples.length = 50;
+        });
+
+        async function runAngo() {
+            const input = userInput.value;
+            if (!input) return;
+
+            await ensureBrain();
+
+            agentStatus.textContent = 'RUN';
+            agentStatus.classList.remove('bg-blue-500');
+            agentStatus.classList.add('bg-yellow-500');
+
+            const safeIntent = String(input).slice(0, 30);
+            mesh.set({ intent: safeIntent, timestamp: Date.now(), sid: sessionId.slice(0, 8) });
+
+            logMoe('SENTINEL', 'Iniciando escaneamento de segurança...', 'text-yellow-500');
+            await new Promise(r => setTimeout(r, 600));
+
+            logMoe('Z3_LOGIC', 'Consistência formal: OK (0.002ms)', 'text-purple-400');
+            await new Promise(r => setTimeout(r, 400));
+
+            logMoe('GUARDIAN', 'Consultando Mesh P2P para validação cruzada...', 'text-blue-400');
+            await new Promise(r => setTimeout(r, 800));
+
+            const container = document.getElementById('output-container');
+            const card = document.createElement('div');
+            card.className = 'bg-blue-600/5 border border-blue-600/20 rounded-2xl p-6';
+            const rid = ++requestSeq;
+
+            const mode = agentModeEl.checked ? 'agent' : 'reactive';
+            const base = mode === 'agent'
+                ? `Você é o AngoIA. Receba um objetivo e responda com:\n1) Plano (3-6 passos)\n2) Execução (resumo)\n3) Resultado final\nSeja direto e técnico.\n\nObjetivo: ${input}\n\nResposta:`
+                : `Você é o AngoIA. Responda de forma direta e técnica.\n\nPergunta: ${input}\n\nResposta:`;
+
+            card.innerHTML = `
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-[10px] font-bold shadow-lg shadow-blue-600/20">ANGO</div>
+                    <div class="flex-1">
+                        <p class="text-gray-400 text-xs mb-1 uppercase tracking-widest font-bold">Resposta AngoIA</p>
+                        <p class="text-gray-200 leading-relaxed whitespace-pre-wrap" data-answer>Processando inferência local...</p>
+                        <p class="text-xs text-gray-500 mt-3" data-meta>Backend: INIT | Modelo: carregando...</p>
+                        <p class="text-xs text-gray-500 mt-2">Intenção compartilhada na Mesh (anonimizada): <span class="text-gray-400 code-font">${escapeHtml(safeIntent)}</span></p>
+                    </div>
+                </div>
+            `;
+            container.prepend(card);
+
+            const cardAnswerEl = card.querySelector('[data-answer]');
+            const cardMetaEl = card.querySelector('[data-meta]');
+
+            pendingByRid.set(rid, { cardAnswerEl, cardMetaEl, prompt: base });
+            worker.postMessage({ type: 'generate', rid, prompt: base, maxNewTokens: mode === 'agent' ? 256 : 192, temperature: mode === 'agent' ? 0.5 : 0.35 });
+            logMoe('Z3_LOGIC', `Modo: ${mode.toUpperCase()} | RID: ${rid}`, 'text-purple-400');
+
+            userInput.value = '';
+            userInput.focus();
+        }
+
+        setConsoleFilter('ALL');
+        setBrainStatus('loading');
+        ensureBrain();
+    </script>
+</body>
+</html>

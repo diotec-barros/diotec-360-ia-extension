@@ -1,0 +1,266 @@
+{
+  "name": "diotec-360-ia-extension",
+  "displayName": "DIOTEC 360 IA",
+  "description": "AI coding assistant with Mixture of Experts architecture. Built by DIOTEC 360.",
+  "version": "0.0.1",
+  "publisher": "diotec-360",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diotec-barros/diotec-360-ia-extension"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "submenus": [
+      {
+        "id": "angoIA.submenu",
+        "label": "ANGO IA"
+      }
+    ],
+    "commands": [
+      {
+        "command": "angoIA.generate",
+        "title": "ANGO IA: Generate"
+      },
+      {
+        "command": "angoIA.explain",
+        "title": "ANGO IA: Explain"
+      },
+      {
+        "command": "angoIA.refactor",
+        "title": "ANGO IA: Refactor"
+      },
+      {
+        "command": "angoIA.chat",
+        "title": "ANGO IA: Chat"
+      },
+      {
+        "command": "angoIA.chatClearHistory",
+        "title": "ANGO IA: Chat — Clear History"
+      },
+      {
+        "command": "angoIA.applyLastSuggestion",
+        "title": "ANGO IA: Apply Last Suggestion"
+      },
+      {
+        "command": "angoIA.configureApiKey",
+        "title": "ANGO IA: Configure OpenAI API Key"
+      },
+      {
+        "command": "angoIA.openMemory",
+        "title": "ANGO IA: Open Memory DB"
+      },
+      {
+        "command": "diotec360.configureSovereignIdentity",
+        "title": "DIOTEC 360: Configure Sovereign Identity"
+      }
+    ],
+    "menus": {
+      "angoIA.submenu": [
+        {
+          "command": "angoIA.generate",
+          "group": "1_actions"
+        },
+        {
+          "command": "angoIA.explain",
+          "group": "1_actions"
+        },
+        {
+          "command": "angoIA.refactor",
+          "group": "1_actions"
+        },
+        {
+          "command": "angoIA.chat",
+          "group": "1_actions"
+        },
+        {
+          "command": "angoIA.chatClearHistory",
+          "group": "1_actions"
+        },
+        {
+          "command": "angoIA.configureApiKey",
+          "group": "2_settings"
+        },
+        {
+          "command": "angoIA.openMemory",
+          "group": "3_memory"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "angoIA.generate",
+          "when": "editorTextFocus",
+          "group": "navigation@1"
+        },
+        {
+          "command": "angoIA.explain",
+          "when": "editorTextFocus",
+          "group": "navigation@2"
+        },
+        {
+          "command": "angoIA.refactor",
+          "when": "editorTextFocus",
+          "group": "navigation@3"
+        },
+        {
+          "command": "angoIA.chat",
+          "when": "editorTextFocus",
+          "group": "navigation@4"
+        },
+        {
+          "command": "angoIA.chatClearHistory",
+          "when": "editorTextFocus",
+          "group": "navigation@5"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "angoIA.generate",
+          "when": "editorTextFocus",
+          "group": "navigation@1"
+        },
+        {
+          "command": "angoIA.explain",
+          "when": "editorTextFocus",
+          "group": "navigation@2"
+        },
+        {
+          "command": "angoIA.refactor",
+          "when": "editorTextFocus",
+          "group": "navigation@3"
+        },
+        {
+          "command": "angoIA.chat",
+          "when": "editorTextFocus",
+          "group": "navigation@4"
+        },
+        {
+          "command": "angoIA.chatClearHistory",
+          "when": "editorTextFocus",
+          "group": "navigation@5"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ANGO IA",
+      "properties": {
+        "angoIA.enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "angoIA.moe.enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "angoIA.moe.writer.provider": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "openai"
+          ],
+          "default": "ollama"
+        },
+        "angoIA.moe.writer.model": {
+          "type": "string",
+          "default": ""
+        },
+        "angoIA.moe.critic.provider": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "openai"
+          ],
+          "default": "openai"
+        },
+        "angoIA.moe.critic.model": {
+          "type": "string",
+          "default": "gpt-4o-mini"
+        },
+        "angoIA.moe.critic.enabledForGenerate": {
+          "type": "boolean",
+          "default": true
+        },
+        "angoIA.moe.critic.enabledForRefactor": {
+          "type": "boolean",
+          "default": true
+        },
+        "angoIA.moe.critic.minChars": {
+          "type": "number",
+          "default": 200,
+          "minimum": 0
+        },
+        "angoIA.provider": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "openai"
+          ],
+          "default": "ollama"
+        },
+        "angoIA.streaming.enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "angoIA.ollama.endpoint": {
+          "type": "string",
+          "default": "http://localhost:11434"
+        },
+        "angoIA.ollama.model": {
+          "type": "string",
+          "default": "llama3"
+        },
+        "angoIA.openai.model": {
+          "type": "string",
+          "default": "gpt-4o-mini"
+        },
+        "angoIA.memory.enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "angoIA.memory.storeRawContext": {
+          "type": "boolean",
+          "default": false
+        },
+        "angoIA.diotec360.endpoint": {
+          "type": "string",
+          "default": "https://diotec-360-diotec-360-ia-judge.hf.space"
+        },
+        "angoIA.diotec360.publicKeyHex": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "vscode:prepublish": "npm run compile",
+    "lint": "echo 'no lint configured'",
+    "package": "vsce package",
+    "clean": "rmdir /s /q dist 2>nul || echo Clean complete"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.90.0",
+    "@types/markdown-it": "^14.1.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^3.0.0",
+    "@noble/hashes": "^1.4.0",
+    "highlight.js": "^11.9.0",
+    "markdown-it": "^14.1.0",
+    "sql.js": "^1.10.3"
+  }
+}
