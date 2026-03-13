@@ -4,6 +4,43 @@
 **Engenheiro:** Kiro  
 **Tempo de Execução:** 30 minutos  
 **Status:** ✅ **EXORCISMO DE MARCA COMPLETO**
+diotec-360-ia-
+
+echo "# diotec-360-ia" >> README.md
+
+git init
+
+git add README.md
+
+git commit -m "first commit"
+
+git branch -M main
+
+git remote add origin https://github.com/diotec-barros/diotec-360-ia.git
+
+git push -u origin main
+
+
+
+
+
+
+
+
+
+echo "# diotec-360-ia-extension" >> README.md
+
+git init
+
+git add README.md
+
+git commit -m "first commit"
+
+git branch -M main
+
+git remote add origin https://github.com/diotec-barros/diotec-360-ia-extension.git
+
+git push -u origin main
 
 ---
 

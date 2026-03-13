@@ -1,39 +1,155 @@
-# Dependencies
-node_modules/
+# ===========================================================================
+# DIOTEC 360 IA - .gitignore
+# Protege secrets e arquivos sensíveis
+# ===========================================================================
 
-# Build output
-dist/
-out/
-*.vsix
+# ===========================================================================
+# 🔐 SECRETS E CONFIGURAÇÕES SENSÍVEIS (NUNCA COMMITAR!)
+# ===========================================================================
+.env
+.env.*
+*.env
+.env.local
+.env.production
+.env.development
+.env.backup*
+.env.sandbox
+.env.test
 
-# Testing
-.vscode-test/
-coverage/
+# Tokens e Keys
+*_token.txt
+*_key.txt
+*_secret.txt
+secrets/
+.secrets/
+*.pem
+*.key
+*.cert
 
-# Logs
+# ===========================================================================
+# 💾 DATABASES E ESTADO (LOCAL ONLY)
+# ===========================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+.aethel_sentinel/
+.aethel_state/
+.aethel_vault/
+.diotec360_sentinel/
+.diotec360_state/
+.diotec360_vault/
+.demo_audit/
+.demo_vault/
+.test_*/
+
+# ===========================================================================
+# 📝 LOGS E TELEMETRIA
+# ===========================================================================
 *.log
+logs/
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.hypothesis/
 
-# Environment variables and secrets
-.env
-.env.*
-!.env.example
-*.key
-*.pem
-secrets/
+# ===========================================================================
+# 📦 NODE.JS E NPM
+# ===========================================================================
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log*
+# Note: package-lock.json is NOT ignored (needed for reproducible builds)
 
-# VS Code settings (user-specific)
+# ===========================================================================
+# 🏗️ BUILD E DIST
+# ===========================================================================
+dist/
+build/
+out/
+*.vsix
+*.tsbuildinfo
+
+# ===========================================================================
+# 🧪 TESTES
+# ===========================================================================
+coverage/
+.nyc_output/
+*.test.js.snap
+
+# ===========================================================================
+# 🔧 IDEs E EDITORES
+# ===========================================================================
 .vscode/settings.json
-
-# OS files
-.DS_Store
-Thumbs.db
+.vscode/launch.json
+.vscode/*.code-workspace
+.idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-# IDE
-.idea/
-*.iml
+# ===========================================================================
+# 💻 SISTEMA OPERACIONAL
+# ===========================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===========================================================================
+# 🐍 PYTHON (para scripts auxiliares)
+# ===========================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# ===========================================================================
+# 🔄 TEMPORÁRIOS E CACHE
+# ===========================================================================
+*.tmp
+*.temp
+*.cache
+.cache/
+.temp/
+.tmp/
+
+# ===========================================================================
+# ✅ O QUE DEVE SER COMMITADO:
+# ===========================================================================
+# ✅ Código fonte (.ts, .js, .json)
+# ✅ Documentação (.md)
+# ✅ Configurações públicas (package.json, tsconfig.json)
+# ✅ Templates (.env.example)
+# ✅ Assets (imagens, ícones)
+# ✅ Testes
+# ✅ Scripts de build
+#
+# ❌ O QUE NUNCA DEVE SER COMMITADO:
+# ❌ Tokens e secrets
+# ❌ Arquivos .env reais
+# ❌ Databases
+# ❌ Logs
+# ❌ node_modules
+# ❌ Builds
+# ===========================================================================
+
