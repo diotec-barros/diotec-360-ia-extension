@@ -1,0 +1,60 @@
+{
+  "name": "@diotec360/sdk",
+  "version": "1.0.0",
+  "description": "DIOTEC 360 IA Sovereign SDK - Integrity as a Service. Mathematical verification for any app.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup diotec-connect.ts --format cjs,esm --dts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "diotec360",
+    "verification",
+    "formal-verification",
+    "z3",
+    "theorem-prover",
+    "integrity",
+    "audit",
+    "blockchain",
+    "merkle-proof",
+    "angola",
+    "sovereign-ai"
+  ],
+  "author": "Dionísio Sebastião Barros <contact@diotec360.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diotec-barros/diotec-360-ia-extension.git",
+    "directory": "sdk"
+  },
+  "homepage": "https://diotec360.com/sdk",
+  "bugs": {
+    "url": "https://github.com/diotec-barros/diotec-360-ia-extension/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
