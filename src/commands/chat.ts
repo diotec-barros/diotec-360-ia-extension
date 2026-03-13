@@ -7,6 +7,7 @@ import { PreviewPanel } from '../ui/previewPanel';
 import { renderMarkdownToHtml } from '../ui/markdownRenderer';
 import { Output } from '../utils/logger';
 import { MemoryStore } from '../memory/store';
+import { getSyncEngine } from '../extension'; // Task 16.1: Import sync engine getter
 
 const sessionHistoryByWorkspace = new Map<string, ChatMessage[]>();
 
@@ -109,6 +110,18 @@ export async function chatCommand(context: vscode.ExtensionContext, output: Outp
       await memory.logDecision(interactionId, 'edited');
     }
     await memory.logDecision(interactionId, 'accepted');
+    
+    // Task 16.1: Wire sync engine to Dual Audit completion
+    const syncEngine = getSyncEngine();
+    if (syncEngine) {
+      try {
+        syncEngine.queueInteraction(interactionId);
+        output.info(`✅ Interaction ${interactionId} queued for sync`);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        output.error(`⚠️ Failed to queue interaction for sync: ${errorMessage}`);
+      }
+    }
   });
 
   panel.onCopy(async () => {

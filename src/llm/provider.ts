@@ -5,9 +5,15 @@ export interface GenerateRequest {
   messages: ChatMessage[];
 }
 
+export interface GenerateOptions {
+  messages: ChatMessage[];
+}
+
 export type LLMChunk =
   | { type: 'delta'; text: string }
   | { type: 'done' };
+
+export type StreamChunk = LLMChunk;
 
 export interface LLMProvider {
   readonly id: string;

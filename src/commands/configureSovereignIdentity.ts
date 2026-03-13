@@ -1,13 +1,19 @@
 import * as vscode from 'vscode';
-import * as ed from '@noble/ed25519';
 import { sha512 } from '@noble/hashes/sha512';
 
 const D360_PRIVATE_KEY_SECRET = 'angoIA.diotec360.privateKeyHex';
 
-function ensureNobleReady() {
-  if (!ed.etc.sha512Sync) {
-    ed.etc.sha512Sync = (...m: Uint8Array[]) => sha512(ed.etc.concatBytes(...m));
+let ed25519Module: any = null;
+
+async function getEd25519() {
+  if (!ed25519Module) {
+    ed25519Module = await import('@noble/ed25519');
+    const etc = ed25519Module.etc as any;
+    if (!etc.sha512Sync) {
+      etc.sha512Sync = (...m: Uint8Array[]) => sha512(ed25519Module.etc.concatBytes(...m));
+    }
   }
+  return ed25519Module;
 }
 
 function hexToBytes(hex: string) {
@@ -47,7 +53,7 @@ export async function configureSovereignIdentityCommand(context: vscode.Extensio
     return;
   }
 
-  ensureNobleReady();
+  const ed = await getEd25519();
 
   const privBytes = hexToBytes(trimmed);
   const pubBytes = await ed.getPublicKeyAsync(privBytes);

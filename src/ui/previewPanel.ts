@@ -15,6 +15,9 @@ export class PreviewPanel {
   private renderedHtml = '';
   private moeReviewHtml = '';
   private moeRisk: 'low' | 'medium' | 'high' | '' = '';
+  private moeCriticName = '';
+  private diotec360Badge: 'unverified' | 'syntactically_correct' | 'certified' | '' = '';
+  private diotec360Message = '';
   private renderedHtmlTimer: NodeJS.Timeout | undefined;
   private pendingRenderedHtml: string | undefined;
   private status = '';
@@ -97,8 +100,8 @@ export class PreviewPanel {
     if (PreviewPanel.instance) return PreviewPanel.instance;
 
     const panel = vscode.window.createWebviewPanel(
-      'angoIAPreview',
-      'ANGO IA',
+      'diotec360Preview',
+      'DIOTEC 360 IA',
       vscode.ViewColumn.Beside,
       { enableScripts: true, retainContextWhenHidden: true }
     );
@@ -140,15 +143,29 @@ export class PreviewPanel {
     this.postState();
   }
 
-  setMoeReview(reviewMarkdown: string, risk?: 'low' | 'medium' | 'high') {
+  setMoeReview(reviewMarkdown: string, risk?: 'low' | 'medium' | 'high', criticName?: string) {
     this.moeReviewHtml = reviewMarkdown ? renderMarkdownToHtml(reviewMarkdown) : '';
     this.moeRisk = risk ?? '';
+    this.moeCriticName = criticName ?? '';
     this.postState();
   }
 
   clearMoeReview() {
     this.moeReviewHtml = '';
     this.moeRisk = '';
+    this.moeCriticName = '';
+    this.postState();
+  }
+
+  setDiotec360Badge(badge: 'unverified' | 'syntactically_correct' | 'certified', message?: string) {
+    this.diotec360Badge = badge;
+    this.diotec360Message = message ?? '';
+    this.postState();
+  }
+
+  clearDiotec360Badge() {
+    this.diotec360Badge = '';
+    this.diotec360Message = '';
     this.postState();
   }
 
@@ -216,6 +233,9 @@ export class PreviewPanel {
       html: this.renderedHtml,
       moeReviewHtml: this.moeReviewHtml,
       moeRisk: this.moeRisk,
+      moeCriticName: this.moeCriticName,
+      diotec360Badge: this.diotec360Badge,
+      diotec360Message: this.diotec360Message,
       status: this.status
     });
   }
@@ -229,7 +249,7 @@ export class PreviewPanel {
 <meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ANGO IA</title>
+<title>DIOTEC 360 IA</title>
 <style>
   body { font-family: var(--vscode-font-family); padding: 12px; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
@@ -252,6 +272,13 @@ export class PreviewPanel {
   #moeRiskBadge.low { display: inline-block; background: rgba(0, 128, 0, 0.12); }
   #moeRiskBadge.medium { display: inline-block; background: rgba(255, 165, 0, 0.14); }
   #moeRiskBadge.high { display: inline-block; background: rgba(255, 0, 0, 0.12); }
+  #diotec360Badge { display: none; margin-top: 10px; padding: 10px; border-radius: 6px; border: 1px solid var(--vscode-editorWidget-border); }
+  #diotec360Badge.certified { display: block; background: rgba(0, 128, 0, 0.08); border-color: rgba(0, 128, 0, 0.3); }
+  #diotec360Badge.syntactically_correct { display: block; background: rgba(255, 165, 0, 0.08); border-color: rgba(255, 165, 0, 0.3); }
+  #diotec360Badge.unverified { display: block; background: rgba(255, 0, 0, 0.08); border-color: rgba(255, 0, 0, 0.3); }
+  #diotec360BadgeHeader { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 6px; }
+  #diotec360BadgeIcon { font-size: 18px; }
+  #diotec360BadgeMessage { font-size: 13px; opacity: 0.9; }
   ${HLJS_THEME_CSS}
 </style>
 </head>
@@ -273,11 +300,20 @@ export class PreviewPanel {
 
   <div id="out"></div>
 
+  <div id="diotec360Badge">
+    <div id="diotec360BadgeHeader">
+      <span id="diotec360BadgeIcon"></span>
+      <span id="diotec360BadgeTitle"></span>
+    </div>
+    <div id="diotec360BadgeMessage"></div>
+  </div>
+
   <div id="moeReview" style="display:none;">
     <div id="moeReviewHeader">
       <div id="moeReviewTitle">Critic Review</div>
       <div id="moeRiskBadge"></div>
     </div>
+    <div id="moeCriticName" style="font-size: 12px; opacity: 0.7; margin-bottom: 8px;"></div>
     <div id="moeReviewBody"></div>
   </div>
 
@@ -287,7 +323,12 @@ export class PreviewPanel {
     const out = document.getElementById('out');
     const moeReview = document.getElementById('moeReview');
     const moeReviewBody = document.getElementById('moeReviewBody');
+    const moeCriticName = document.getElementById('moeCriticName');
     const moeRiskBadge = document.getElementById('moeRiskBadge');
+    const diotec360Badge = document.getElementById('diotec360Badge');
+    const diotec360BadgeIcon = document.getElementById('diotec360BadgeIcon');
+    const diotec360BadgeTitle = document.getElementById('diotec360BadgeTitle');
+    const diotec360BadgeMessage = document.getElementById('diotec360BadgeMessage');
     const status = document.getElementById('status');
     const editor = document.getElementById('editor');
 
@@ -330,10 +371,42 @@ export class PreviewPanel {
         out.innerHTML = msg.html || '';
         status.textContent = msg.status || '';
 
+        // 🏛️ DIOTEC 360 Judge Badge
+        const badge = (msg.diotec360Badge || '').toString();
+        if (badge === 'certified' || badge === 'syntactically_correct' || badge === 'unverified') {
+          diotec360Badge.className = '';
+          diotec360Badge.classList.add(badge);
+          
+          if (badge === 'certified') {
+            diotec360BadgeIcon.textContent = '🟢';
+            diotec360BadgeTitle.textContent = 'DIOTEC 360 CERTIFIED';
+          } else if (badge === 'syntactically_correct') {
+            diotec360BadgeIcon.textContent = '🟡';
+            diotec360BadgeTitle.textContent = 'Syntactically Correct';
+          } else {
+            diotec360BadgeIcon.textContent = '🔴';
+            diotec360BadgeTitle.textContent = 'Unverified';
+          }
+          
+          diotec360BadgeMessage.textContent = msg.diotec360Message || '';
+        } else {
+          diotec360Badge.className = '';
+        }
+
+        // 🧠 MOE Critic Review
         const reviewHtml = msg.moeReviewHtml || '';
         if (reviewHtml) {
           moeReview.style.display = '';
           moeReviewBody.innerHTML = reviewHtml;
+          
+          // Exibir nome do Critico (ex: "Critique by Claude 3.5 Sonnet")
+          const criticName = msg.moeCriticName || '';
+          if (criticName) {
+            moeCriticName.textContent = 'Critique by ' + criticName;
+            moeCriticName.style.display = '';
+          } else {
+            moeCriticName.style.display = 'none';
+          }
 
           const risk = (msg.moeRisk || '').toString();
           const lower = risk.toLowerCase();
@@ -346,6 +419,7 @@ export class PreviewPanel {
         } else {
           moeReview.style.display = 'none';
           moeReviewBody.innerHTML = '';
+          moeCriticName.style.display = 'none';
           moeRiskBadge.className = '';
           moeRiskBadge.textContent = '';
         }

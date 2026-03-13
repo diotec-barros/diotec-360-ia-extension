@@ -5,7 +5,7 @@ export type MoeCriticCommand = 'generate' | 'refactor';
 
 export function buildCriticMessages(command: MoeCriticCommand, ctx: EditorContext, writerOutput: string): ChatMessage[] {
   const system =
-    'You are ANGO IA Critic. Your job is to review the Writer output for correctness, safety, and alignment with the task.\n' +
+    'You are DIOTEC 360 IA Critic. Your job is to review the Writer output for correctness, safety, and alignment with the task.\n' +
     'Rules:\n' +
     '- Do NOT rewrite the full solution. Provide review only.\n' +
     '- Do NOT claim you read files you were not shown. You only have editor context, imports, and open file paths.\n' +

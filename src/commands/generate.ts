@@ -9,6 +9,7 @@ import { Output } from '../utils/logger';
 import { MemoryStore } from '../memory/store';
 import { setLastSuggestion } from '../suggestions/store';
 import { MoeOrchestrator } from '../moe/orchestrator';
+import { getSyncEngine } from '../extension'; // Task 16.1: Import sync engine getter
 
 export async function generateCommand(context: vscode.ExtensionContext, output: Output) {
   const settings = getSettings();
@@ -28,6 +29,7 @@ export async function generateCommand(context: vscode.ExtensionContext, output: 
   panel.setContent('');
   panel.setRenderedHtml('');
   panel.clearMoeReview();
+  panel.clearDiotec360Badge();
   panel.setStatus('Generating...');
 
   const cts = new vscode.CancellationTokenSource();
@@ -68,6 +70,21 @@ export async function generateCommand(context: vscode.ExtensionContext, output: 
       await memory.logDecision(interactionId, 'edited');
     }
     await memory.logDecision(interactionId, 'accepted');
+    
+    // Task 16.1: Wire sync engine to Dual Audit completion
+    // After Judge verdict is recorded in SQLite, trigger queueInteraction()
+    // Don't block UI while sync happens
+    const syncEngine = getSyncEngine();
+    if (syncEngine) {
+      try {
+        syncEngine.queueInteraction(interactionId);
+        output.info(`✅ Interaction ${interactionId} queued for sync`);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        output.error(`⚠️ Failed to queue interaction for sync: ${errorMessage}`);
+        // Continue - sync failure shouldn't block user
+      }
+    }
   });
 
   panel.onCopy(async () => {
@@ -115,14 +132,35 @@ export async function generateCommand(context: vscode.ExtensionContext, output: 
 
     if (moe.shouldRunCritic('generate', generatedText)) {
       panel.setStatus('Reviewing...');
-      const review = await moe.getCriticReview('generate', ctx, generatedText, cts.token);
+      
+      // 🏛️ DUAL AUDIT: Crítico (IA) e Judge (Z3) rodam em PARALELO
+      const dualAudit = await moe.getDualAudit('generate', ctx, generatedText, cts.token);
+      
       await memory.logDecision(interactionId, 'moe_reviewed');
-      const risk = MoeOrchestrator.parseRiskLevel(review);
-      if (risk) {
-        const decision = risk === 'low' ? 'moe_risk_low' : risk === 'medium' ? 'moe_risk_medium' : 'moe_risk_high';
+      
+      // 🧠 Exibir Crítico (IA)
+      if (dualAudit.criticRisk) {
+        const decision = dualAudit.criticRisk === 'low' ? 'moe_risk_low' : dualAudit.criticRisk === 'medium' ? 'moe_risk_medium' : 'moe_risk_high';
         await memory.logDecision(interactionId, decision);
       }
-      panel.setMoeReview(review, risk);
+      
+      // 🏛️ Obter nome do Crítico para exibir na UI
+      const criticProvider = await moe.getWriterProvider(); // Usa o mesmo provider do Writer por padrão
+      const criticName = `${criticProvider.id === 'anthropic' ? 'Claude' : criticProvider.id === 'openai' ? 'GPT' : 'Llama'} ${criticProvider.model}`;
+      
+      panel.setMoeReview(dualAudit.criticReview, dualAudit.criticRisk, criticName);
+      
+      // ⚖️ Exibir Judge (Z3)
+      if (dualAudit.judgeVerdict) {
+        const verdict = dualAudit.judgeVerdict;
+        panel.setDiotec360Badge(verdict.badge, verdict.message);
+        
+        // 🏛️ CONFLICT RESOLVER: Judge tem prioridade sobre Crítico
+        if (verdict.badge === 'unverified' && dualAudit.criticRisk === 'low') {
+          const warningMessage = `⚠️ Embora o código pareça limpo (Critic: Low Risk), ele falhou na prova de segurança matemática (Judge: Unverified).\n\n${verdict.message}`;
+          panel.setDiotec360Badge('unverified', warningMessage);
+        }
+      }
     }
 
     setLastSuggestion({

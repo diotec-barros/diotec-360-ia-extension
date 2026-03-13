@@ -4,6 +4,13 @@ import { getProvider } from '../llm/router';
 import { LLMProvider } from '../llm/provider';
 import { EditorContext } from '../prompt/contextBuilder';
 import { buildCriticMessages, MoeCriticCommand } from './criticPrompt';
+import { Diotec360KernelBridge, Diotec360Rvc } from '../diotec360/kernel_bridge';
+
+export type DualAuditResult = {
+  criticReview: string;
+  criticRisk: 'low' | 'medium' | 'high' | undefined;
+  judgeVerdict: Diotec360Rvc | undefined;
+};
 
 export class MoeOrchestrator {
   constructor(
@@ -42,6 +49,38 @@ export class MoeOrchestrator {
     return criticProvider.generate({ messages }, token);
   }
 
+  async getDualAudit(command: MoeCriticCommand, ctx: EditorContext, writerOutput: string, token: vscode.CancellationToken): Promise<DualAuditResult> {
+    // 🏛️ DUAL AUDIT LOOP: Crítico (IA) e Judge (Z3) rodam em PARALELO
+    const [criticReview, judgeVerdict] = await Promise.all([
+      this.getCriticReview(command, ctx, writerOutput, token).catch((err) => {
+        return `[Critic Error: ${err instanceof Error ? err.message : String(err)}]`;
+      }),
+      this.getJudgeVerdict(writerOutput, token).catch((err) => {
+        console.error('Judge verification failed:', err);
+        return undefined;
+      })
+    ]);
+
+    const criticRisk = MoeOrchestrator.parseRiskLevel(criticReview);
+
+    return {
+      criticReview,
+      criticRisk,
+      judgeVerdict
+    };
+  }
+
+  private async getJudgeVerdict(code: string, token: vscode.CancellationToken): Promise<Diotec360Rvc | undefined> {
+    try {
+      const bridge = Diotec360KernelBridge.fromSettings(this.context);
+      return await bridge.verifyAethel(code, token);
+    } catch (err) {
+      // Se o Judge não estiver configurado ou o backend não estiver disponível, retorna undefined
+      console.warn('DIOTEC 360 Judge not available:', err);
+      return undefined;
+    }
+  }
+
   static appendReviewMarkdown(writerOutput: string, reviewMarkdown: string): string {
     const cleanedReview = reviewMarkdown.trim();
     if (!cleanedReview) return writerOutput;
@@ -63,12 +102,15 @@ export class MoeOrchestrator {
       provider,
       ollama: { ...this.settings.ollama },
       openai: { ...this.settings.openai },
+      anthropic: { ...this.settings.anthropic },
       memory: { ...this.settings.memory },
       moe: { ...this.settings.moe }
     };
 
     if (provider === 'openai') {
       cloned.openai = { ...cloned.openai, model: modelOverride || cloned.openai.model };
+    } else if (provider === 'anthropic') {
+      cloned.anthropic = { ...cloned.anthropic, model: modelOverride || cloned.anthropic.model };
     } else {
       cloned.ollama = { ...cloned.ollama, model: modelOverride || cloned.ollama.model };
     }

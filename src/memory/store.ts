@@ -169,6 +169,31 @@ export class MemoryStore {
     } catch {
       // ignore if already exists
     }
+
+    // v3.3.0: Add Merkle Memory sync fields
+    try {
+      db.run(`ALTER TABLE interactions ADD COLUMN synced INTEGER DEFAULT 0;`);
+    } catch {
+      // ignore if already exists
+    }
+
+    try {
+      db.run(`ALTER TABLE interactions ADD COLUMN merkle_root TEXT;`);
+    } catch {
+      // ignore if already exists
+    }
+
+    try {
+      db.run(`ALTER TABLE interactions ADD COLUMN judge_verdict TEXT;`);
+    } catch {
+      // ignore if already exists
+    }
+
+    try {
+      db.run(`ALTER TABLE interactions ADD COLUMN judge_message TEXT;`);
+    } catch {
+      // ignore if already exists
+    }
   }
 
   private async persist(db: Database) {
@@ -176,5 +201,13 @@ export class MemoryStore {
     const dbFile = vscode.Uri.joinPath(this.context.globalStorageUri, 'ango-ia.sqlite');
     const data = db.export();
     await vscode.workspace.fs.writeFile(dbFile, data);
+  }
+
+  /**
+   * Get database instance for sync engine
+   * @internal Used by MemorySyncEngine
+   */
+  public getDatabase(): Promise<Database> {
+    return this.getDb();
   }
 }

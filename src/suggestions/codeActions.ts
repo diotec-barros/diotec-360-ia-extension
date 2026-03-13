@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { getApplicableLastSuggestion } from './store';
 
-export class AngoIaSuggestionCodeActionProvider implements vscode.CodeActionProvider {
+export class Diotec360SuggestionCodeActionProvider implements vscode.CodeActionProvider {
   static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
 
   provideCodeActions(
@@ -11,9 +11,9 @@ export class AngoIaSuggestionCodeActionProvider implements vscode.CodeActionProv
     const suggestion = getApplicableLastSuggestion(document.uri, range);
     if (!suggestion) return;
 
-    const action = new vscode.CodeAction('ANGO IA: Apply last suggestion', vscode.CodeActionKind.QuickFix);
+    const action = new vscode.CodeAction('DIOTEC 360 IA: Apply last suggestion', vscode.CodeActionKind.QuickFix);
     action.command = {
-      command: 'angoIA.applyLastSuggestion',
+      command: 'diotec360.applyLastSuggestion',
       title: 'Apply last suggestion',
       arguments: [document.uri, suggestion.range]
     };

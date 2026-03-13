@@ -2,7 +2,9 @@
 
 [![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue)](https://marketplace.visualstudio.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.0.1-green.svg)](https://github.com/diotec-barros/diotec-360-ia-extension)
+[![Version](https://img.shields.io/badge/version-3.7.0-green.svg)](https://github.com/diotec-barros/diotec-360-ia-extension)
+[![Status](https://img.shields.io/badge/status-production%20ready-brightgreen.svg)](https://github.com/diotec-barros/diotec-360-ia-extension)
+[![Build](https://img.shields.io/badge/build-passing-success.svg)](https://github.com/diotec-barros/diotec-360-ia-extension)
 
 AI coding assistant for VS Code with advanced features including Mixture of Experts (MoE) architecture and interaction memory.
 

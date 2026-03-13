@@ -23,136 +23,152 @@
   "contributes": {
     "submenus": [
       {
-        "id": "angoIA.submenu",
-        "label": "ANGO IA"
+        "id": "diotec360.submenu",
+        "label": "DIOTEC 360 IA"
       }
     ],
     "commands": [
       {
-        "command": "angoIA.generate",
-        "title": "ANGO IA: Generate"
+        "command": "diotec360.generate",
+        "title": "DIOTEC 360 IA: Generate"
       },
       {
-        "command": "angoIA.explain",
-        "title": "ANGO IA: Explain"
+        "command": "diotec360.explain",
+        "title": "DIOTEC 360 IA: Explain"
       },
       {
-        "command": "angoIA.refactor",
-        "title": "ANGO IA: Refactor"
+        "command": "diotec360.refactor",
+        "title": "DIOTEC 360 IA: Refactor"
       },
       {
-        "command": "angoIA.chat",
-        "title": "ANGO IA: Chat"
+        "command": "diotec360.chat",
+        "title": "DIOTEC 360 IA: Chat"
       },
       {
-        "command": "angoIA.chatClearHistory",
-        "title": "ANGO IA: Chat — Clear History"
+        "command": "diotec360.chatClearHistory",
+        "title": "DIOTEC 360 IA: Chat — Clear History"
       },
       {
-        "command": "angoIA.applyLastSuggestion",
-        "title": "ANGO IA: Apply Last Suggestion"
+        "command": "diotec360.applyLastSuggestion",
+        "title": "DIOTEC 360 IA: Apply Last Suggestion"
       },
       {
-        "command": "angoIA.configureApiKey",
-        "title": "ANGO IA: Configure OpenAI API Key"
+        "command": "diotec360.configureApiKey",
+        "title": "DIOTEC 360 IA: Configure OpenAI API Key"
       },
       {
-        "command": "angoIA.openMemory",
-        "title": "ANGO IA: Open Memory DB"
+        "command": "diotec360.configureAnthropicApiKey",
+        "title": "DIOTEC 360 IA: Configure Anthropic API Key"
+      },
+      {
+        "command": "diotec360.openMemory",
+        "title": "DIOTEC 360 IA: Open Memory DB"
       },
       {
         "command": "diotec360.configureSovereignIdentity",
         "title": "DIOTEC 360: Configure Sovereign Identity"
+      },
+      {
+        "command": "diotec360.buyCredits",
+        "title": "DIOTEC 360: Buy Credits"
+      },
+      {
+        "command": "diotec360.viewBalance",
+        "title": "DIOTEC 360: View Credit Balance"
       }
     ],
     "menus": {
-      "angoIA.submenu": [
+      "diotec360.submenu": [
         {
-          "command": "angoIA.generate",
+          "command": "diotec360.generate",
           "group": "1_actions"
         },
         {
-          "command": "angoIA.explain",
+          "command": "diotec360.explain",
           "group": "1_actions"
         },
         {
-          "command": "angoIA.refactor",
+          "command": "diotec360.refactor",
           "group": "1_actions"
         },
         {
-          "command": "angoIA.chat",
+          "command": "diotec360.chat",
           "group": "1_actions"
         },
         {
-          "command": "angoIA.chatClearHistory",
+          "command": "diotec360.chatClearHistory",
           "group": "1_actions"
         },
         {
-          "command": "angoIA.configureApiKey",
+          "command": "diotec360.configureApiKey",
           "group": "2_settings"
         },
         {
-          "command": "angoIA.openMemory",
+          "command": "diotec360.configureAnthropicApiKey",
+          "group": "2_settings"
+        },
+        {
+          "command": "diotec360.openMemory",
           "group": "3_memory"
         }
       ],
       "editor/context": [
         {
-          "command": "angoIA.generate",
+          "command": "diotec360.generate",
           "when": "editorTextFocus",
           "group": "navigation@1"
         },
         {
-          "command": "angoIA.explain",
+          "command": "diotec360.explain",
           "when": "editorTextFocus",
           "group": "navigation@2"
         },
         {
-          "command": "angoIA.refactor",
+          "command": "diotec360.refactor",
           "when": "editorTextFocus",
           "group": "navigation@3"
         },
         {
-          "command": "angoIA.chat",
+          "command": "diotec360.chat",
           "when": "editorTextFocus",
           "group": "navigation@4"
         },
         {
-          "command": "angoIA.chatClearHistory",
+          "command": "diotec360.chatClearHistory",
           "when": "editorTextFocus",
           "group": "navigation@5"
         }
       ],
       "editor/title": [
         {
-          "command": "angoIA.generate",
+          "command": "diotec360.generate",
           "when": "editorTextFocus",
           "group": "navigation@1"
         },
         {
-          "command": "angoIA.explain",
+          "command": "diotec360.explain",
           "when": "editorTextFocus",
           "group": "navigation@2"
         },
         {
-          "command": "angoIA.refactor",
+          "command": "diotec360.refactor",
           "when": "editorTextFocus",
           "group": "navigation@3"
         },
         {
-          "command": "angoIA.chat",
+          "command": "diotec360.chat",
           "when": "editorTextFocus",
           "group": "navigation@4"
         },
         {
-          "command": "angoIA.chatClearHistory",
+          "command": "diotec360.chatClearHistory",
           "when": "editorTextFocus",
           "group": "navigation@5"
         }
       ]
     },
     "configuration": {
-      "title": "ANGO IA",
+      "title": "DIOTEC 360 IA",
       "properties": {
         "angoIA.enabled": {
           "type": "boolean",
@@ -166,9 +182,11 @@
           "type": "string",
           "enum": [
             "ollama",
-            "openai"
+            "openai",
+            "anthropic"
           ],
-          "default": "ollama"
+          "default": "ollama",
+          "description": "LLM provider for the Writer (code generator)"
         },
         "angoIA.moe.writer.model": {
           "type": "string",
@@ -178,9 +196,11 @@
           "type": "string",
           "enum": [
             "ollama",
-            "openai"
+            "openai",
+            "anthropic"
           ],
-          "default": "openai"
+          "default": "openai",
+          "description": "🏛️ LLM provider for the Critic (code reviewer). Choose 'anthropic' for Claude 3.5 Sonnet (Premium)."
         },
         "angoIA.moe.critic.model": {
           "type": "string",
@@ -203,9 +223,11 @@
           "type": "string",
           "enum": [
             "ollama",
-            "openai"
+            "openai",
+            "anthropic"
           ],
-          "default": "ollama"
+          "default": "ollama",
+          "description": "Default LLM provider"
         },
         "angoIA.streaming.enabled": {
           "type": "boolean",
@@ -221,7 +243,13 @@
         },
         "angoIA.openai.model": {
           "type": "string",
-          "default": "gpt-4o-mini"
+          "default": "gpt-4o-mini",
+          "description": "OpenAI model to use"
+        },
+        "angoIA.anthropic.model": {
+          "type": "string",
+          "default": "claude-3-5-sonnet-20241022",
+          "description": "🏛️ Anthropic model to use (Premium: claude-3-5-sonnet-20241022)"
         },
         "angoIA.memory.enabled": {
           "type": "boolean",
@@ -238,6 +266,17 @@
         "angoIA.diotec360.publicKeyHex": {
           "type": "string",
           "default": ""
+        },
+        "angoIA.mining.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable background proof mining when idle"
+        },
+        "angoIA.mining.idleThresholdSeconds": {
+          "type": "number",
+          "default": 30,
+          "minimum": 10,
+          "description": "Seconds of inactivity before starting mining"
         }
       }
     }
